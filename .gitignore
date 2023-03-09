@@ -128,3 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 Calculadora.psd
+Calculator/rounded_display.png
+PyProjects.code-workspace
