@@ -10,7 +10,7 @@ class MainWindow:
         self.root.title("Siren")
         style = ttk.Style(theme="solar")
         style.theme_use()
-        self.root.geometry("1280x720")
+        # self.root.geometry("1280x720")
 
         self.setup_screen()
 
@@ -53,13 +53,13 @@ class MainWindow:
         )
         find_duplicates_button.pack(side=tk.LEFT)
 
-        self.delete_duplicates_var = tk.BooleanVar()
+        self.delete_duplicates_var = tk.StringVar(value="MOVE Files")
 
         change_folder_radio_button = ttk.Radiobutton(
             master=root,
             text="MOVE duplicates to another folder",
             variable=self.delete_duplicates_var,
-            value=False,
+            value="MOVE Files",
             padding=5,
         )
         change_folder_radio_button.pack()
@@ -68,7 +68,7 @@ class MainWindow:
             master=root,
             text="DELETE duplicates",
             variable=self.delete_duplicates_var,
-            value=True,
+            value="DELETE Files",
             padding=5,
         )
         delete_duplicates_radio_button.pack()
@@ -78,7 +78,63 @@ class MainWindow:
         Renders the secondary screen where the user selects what files will be
         kept and what files will be moved/deleted.
         """
-        print(self.delete_duplicates_var.get(), self.file_path_var.get())
+        duplicates_label = ttk.Label(
+            master=self.root,
+            text="Found duplicates",
+            font="Arial 12 bold",
+        )
+        duplicates_label.grid(row=0, column=0, padx=15, pady=(5, 1), sticky="w")
+
+        main_frame = ttk.Frame(master=self.root)#, borderwidth=2, relief="solid")
+        main_frame.grid(row=1, column=0, padx=10, pady=(1, 10), sticky="nsew")
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(0, weight=1)
+
+        right_frame = ttk.Frame(
+            master=main_frame, 
+            borderwidth=2, 
+            relief="solid", 
+            width=740, 
+            height=600
+        )
+        right_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ns")
+
+        left_frame = ttk.Frame(main_frame, borderwidth=2, relief="solid")
+        left_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ns")
+
+        execute_button = ttk.Button(
+            master=left_frame, 
+            text=self.delete_duplicates_var.get(),
+        )
+        execute_button.grid(row=0, column=0, padx=10, pady=10)
+
+        label1 = ttk.Label(
+            master=left_frame, 
+            text=
+"""
+WARNING: if you selected the option to 
+delete the duplicate files on the previous menu, 
+know that you won't ever be able to recover them.
+""",
+            justify="center"
+        )
+        label1.grid(row=1, column=0, padx=1, pady=10)
+
+        label2 = ttk.Label(
+            master=left_frame,
+            text="""
+If you chose the option to move the duplicates, we 
+will automatically create a folder called "duplicates" 
+inside the folder you selected on the previous screen.
+            """,
+            justify="center"
+        )
+        label2.grid(row=2, column=0, padx=1, pady=10)
+
+        version_label = ttk.Label(main_frame, text="Ver. 1.0.0 - Caio Bianchi", anchor="se", font="Arial 8")
+        version_label.grid(row=1, column=1, padx=1, pady=5, sticky="se")
+
+
 
 # ---------------------------------FUNCTIONS---------------------------------- #
 
