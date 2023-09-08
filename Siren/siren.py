@@ -1,7 +1,10 @@
+import os
 import tkinter as tk
 import ttkbootstrap as ttk
 
 from tkinter import filedialog
+from PIL import Image, ImageTk
+from difPy import dif
 
 
 class MainWindow:
@@ -10,7 +13,7 @@ class MainWindow:
         self.root.title("Siren")
         style = ttk.Style(theme="solar")
         style.theme_use()
-        # self.root.geometry("1280x720")
+        self.root.geometry("1165x695")
 
         self.setup_screen()
 
@@ -82,69 +85,97 @@ class MainWindow:
             master=self.root,
             text="Found duplicates",
             font="Arial 12 bold",
+            padding=(10, 10),
         )
-        duplicates_label.grid(row=0, column=0, padx=15, pady=(5, 1), sticky="w")
+        duplicates_label.pack(anchor="nw")
 
-        main_frame = ttk.Frame(master=self.root)#, borderwidth=2, relief="solid")
-        main_frame.grid(row=1, column=0, padx=10, pady=(1, 10), sticky="nsew")
-        main_frame.columnconfigure(0, weight=1)
-        main_frame.rowconfigure(0, weight=1)
+        main_frame = ttk.Frame(master=self.root, width=1145, height=695)
+        main_frame.pack()
+        main_frame.pack_propagate(0)
+
+        left_frame = ttk.Frame(
+            master=main_frame,
+            height=600,
+            width=1000,
+            borderwidth=2,
+            relief="solid",
+        )
+        left_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)
+        left_frame.pack_propagate(0)
+        
+
+        image_thumbnails = self.load_image_thumbnails()
+        self.image_labels = []
+        num_columns = 6
+
+        for i, img_tk in enumerate(image_thumbnails):
+            row = i // num_columns
+            col = i % num_columns
+            label = ttk.Label(left_frame, image=img_tk)
+            label.image = img_tk
+            label.grid(row=row, column=col, padx=9, pady=9)
+            self.image_labels.append(label)
 
         right_frame = ttk.Frame(
-            master=main_frame, 
-            borderwidth=2, 
-            relief="solid", 
-            width=740, 
-            height=600
+            main_frame, borderwidth=2, relief="solid", width=1000, height=580
         )
-        right_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ns")
+        right_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)
+        right_frame.pack_propagate(0)
 
-        left_frame = ttk.Frame(main_frame, borderwidth=2, relief="solid")
-        left_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ns")
 
         execute_button = ttk.Button(
-            master=left_frame, 
+            master=right_frame,
             text=self.delete_duplicates_var.get(),
         )
         execute_button.grid(row=0, column=0, padx=10, pady=10)
 
         label1 = ttk.Label(
-            master=left_frame, 
-            text=
-"""
+            master=right_frame,
+            text="""
 WARNING: if you selected the option to 
 delete the duplicate files on the previous menu, 
 know that you won't ever be able to recover them.
 """,
-            justify="center"
+            justify="center",
         )
         label1.grid(row=1, column=0, padx=1, pady=10)
 
         label2 = ttk.Label(
-            master=left_frame,
+            master=right_frame,
             text="""
 If you chose the option to move the duplicates, we 
 will automatically create a folder called "duplicates" 
 inside the folder you selected on the previous screen.
             """,
-            justify="center"
+            justify="center",
         )
         label2.grid(row=2, column=0, padx=1, pady=10)
 
-        version_label = ttk.Label(main_frame, text="Ver. 1.0.0 - Caio Bianchi", anchor="se", font="Arial 8")
-        version_label.grid(row=1, column=1, padx=1, pady=5, sticky="se")
+        version_label = ttk.Label(
+            right_frame, text="Ver. 1.0.0 - Caio Bianchi", anchor="se", font="Arial 8"
+        )
+        version_label.pack(side=tk.BOTTOM)
+        version_label.pack_propagate(0)
+        
 
-
-
-# ---------------------------------FUNCTIONS---------------------------------- #
+    # ---------------------------------FUNCTIONS---------------------------------- #
 
     def update_file_path(self):
         """
         Renders the choose folder window and sets its path to the StringVar
-        already initialized.
+        already initialized. If there are no image files on the folder, prompts
+        the user for a new folder.
         """
+        files_in_folder = []
         file_path = filedialog.askdirectory()
-        if file_path:
+
+        for filename in os.listdir(file_path):
+            if filename.endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp")):
+                files_in_folder.append(filename)
+
+        if files_in_folder == []:
+            self.file_path_var.set("No images, select another folder")
+        else:
             self.file_path_var.set(file_path)
 
     def clear_current_page(self):
@@ -157,11 +188,36 @@ inside the folder you selected on the previous screen.
     def check_and_render_second_page(self):
         """
         Checks to see if the file file_path_var actually has a path. Proceeds if
-        it has one.
+        it has one. Also doesn't let the user proceed if there are no images on
+        the selected folder.
         """
-        if self.file_path_var.get() != "Click to choose folder path":
+        # TODO: do not let this proceed if there are no duplicates on folder.
+        if (self.file_path_var.get() != "Click to choose folder path") and (
+            self.file_path_var.get() != "No images, select another folder"
+        ):
             self.clear_current_page()
             self.choose_files_screen()
+
+    def load_image_thumbnails(self):
+        folder_path = self.file_path_var.get()
+        duplicates = []
+        image_thumbnails = []
+
+        x = dif(folder_path)
+        result_json = x.result
+
+        for key, value in result_json.items():
+            duplicates.append(os.path.basename(value['location']))
+            matches = value.get('matches', {})
+            for match_data in matches.values():
+                duplicates.append(os.path.basename(match_data['location']))
+
+        for filename in duplicates:
+            img = Image.open(os.path.join(folder_path, filename))
+            img.thumbnail((100, 100))
+            img_tk = ImageTk.PhotoImage(img)
+            image_thumbnails.append(img_tk)
+        return image_thumbnails
 
 
 root = tk.Tk()
