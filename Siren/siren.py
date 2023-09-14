@@ -13,7 +13,7 @@ class MainWindow:
         self.root.title("Siren")
         style = ttk.Style(theme="solar")
         style.theme_use()
-        self.root.geometry("1165x695")
+        #self.root.geometry("1165x695")
 
         self.setup_screen()
 
@@ -95,34 +95,60 @@ class MainWindow:
 
         left_frame = ttk.Frame(
             master=main_frame,
-            height=600,
-            width=1000,
+            #height=600,
+            #width=1000,
             borderwidth=2,
             relief="solid",
         )
         left_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)
         left_frame.pack_propagate(0)
-        
+
+        # Create a canvas for the left_frame
+        canvas = tk.Canvas(left_frame)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Create a scrollbar for the canvas
+        scrollbar = tk.Scrollbar(left_frame, orient=tk.VERTICAL, command=canvas.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Configure the canvas to use the scrollbar
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Create a frame to contain the image thumbnails
+        image_frame = ttk.Frame(canvas)
+        canvas.create_window((0, 0), window=image_frame, anchor=tk.NW)
 
         image_thumbnails = self.load_image_thumbnails()
         self.image_labels = []
         num_columns = 6
 
-        for i, img_tk in enumerate(image_thumbnails):
-            row = i // num_columns
-            col = i % num_columns
-            label = ttk.Label(left_frame, image=img_tk)
-            label.image = img_tk
-            label.grid(row=row, column=col, padx=9, pady=9)
-            self.image_labels.append(label)
+        if image_thumbnails:
+            for i, img_tk in enumerate(image_thumbnails):
+                row = i // num_columns
+                col = i % num_columns
+                label = ttk.Label(left_frame, image=img_tk)
+                label.image = img_tk
+                label.grid(row=row, column=col, padx=9, pady=9)
+                self.image_labels.append(label)
+
+            # Bind mouse wheel events to the canvas for scrolling
+            canvas.bind("<Configure>", lambda event, canvas=canvas: self.on_canvas_configure(event))
+        else:
+            no_duplicates_found_label = ttk.Label(
+                master=left_frame, 
+                text="No duplicates found", 
+                font="Arial 12 bold"
+            )
+            no_duplicates_found_label.pack(anchor="nw", padx=10, pady=10,)
 
         right_frame = ttk.Frame(
-            main_frame, borderwidth=2, relief="solid", width=1000, height=580
+            master=main_frame, 
+            borderwidth=2, 
+            relief="solid", 
         )
-        right_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)
+        right_frame.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.BOTH, expand=True)
         right_frame.pack_propagate(0)
-
-
+        # TODO: handle the files.
         execute_button = ttk.Button(
             master=right_frame,
             text=self.delete_duplicates_var.get(),
@@ -156,7 +182,6 @@ inside the folder you selected on the previous screen.
         )
         version_label.pack(side=tk.BOTTOM)
         version_label.pack_propagate(0)
-        
 
     # ---------------------------------FUNCTIONS---------------------------------- #
 
@@ -191,7 +216,6 @@ inside the folder you selected on the previous screen.
         it has one. Also doesn't let the user proceed if there are no images on
         the selected folder.
         """
-        # TODO: do not let this proceed if there are no duplicates on folder.
         if (self.file_path_var.get() != "Click to choose folder path") and (
             self.file_path_var.get() != "No images, select another folder"
         ):
@@ -207,10 +231,10 @@ inside the folder you selected on the previous screen.
         result_json = x.result
 
         for key, value in result_json.items():
-            duplicates.append(os.path.basename(value['location']))
-            matches = value.get('matches', {})
+            duplicates.append(os.path.basename(value["location"]))
+            matches = value.get("matches", {})
             for match_data in matches.values():
-                duplicates.append(os.path.basename(match_data['location']))
+                duplicates.append(os.path.basename(match_data["location"]))
 
         for filename in duplicates:
             img = Image.open(os.path.join(folder_path, filename))
@@ -218,7 +242,6 @@ inside the folder you selected on the previous screen.
             img_tk = ImageTk.PhotoImage(img)
             image_thumbnails.append(img_tk)
         return image_thumbnails
-
 
 root = tk.Tk()
 window = MainWindow(root)
