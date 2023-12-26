@@ -11,26 +11,32 @@ class Calculator:
         self.button_queue = []
         self.root.config(bg="#e4df9c")
 
-        self.display_image = tk.PhotoImage(file="rounded_display.png")
-        self.green_C_button = tk.PhotoImage(file="buttons/green_C_button.png")
+        self.display_image = tk.PhotoImage(file="assets/rounded_display.png")
+        self.green_C_button = tk.PhotoImage(file="assets/buttons/green_C_button.png")
         self.green_division_button = tk.PhotoImage(
-            file="buttons/green_division_button.png"
+            file="assets/buttons/green_division_button.png"
         )
-        self.green_times_button = tk.PhotoImage(file="buttons/green_times_button.png")
-        self.red_minus_button = tk.PhotoImage(file="buttons/red_minus_button.png")
-        self.blue_7_button = tk.PhotoImage(file="buttons/blue_7_button.png")
-        self.blue_8_button = tk.PhotoImage(file="buttons/blue_8_button.png")
-        self.blue_9_button = tk.PhotoImage(file="buttons/blue_9_button.png")
-        self.red_plus_button = tk.PhotoImage(file="buttons/red_plus_button.png")
-        self.blue_4_button = tk.PhotoImage(file="buttons/blue_4_button.png")
-        self.blue_5_button = tk.PhotoImage(file="buttons/blue_5_button.png")
-        self.blue_6_button = tk.PhotoImage(file="buttons/blue_6_button.png")
-        self.blue_1_button = tk.PhotoImage(file="buttons/blue_1_button.png")
-        self.blue_2_button = tk.PhotoImage(file="buttons/blue_2_button.png")
-        self.blue_3_button = tk.PhotoImage(file="buttons/blue_3_button.png")
-        self.red_equals_button = tk.PhotoImage(file="buttons/red_equals_button.png")
-        self.blue_0_button = tk.PhotoImage(file="buttons/blue_0_button.png")
-        self.blue_dot_button = tk.PhotoImage(file="buttons/blue_dot_button.png")
+        self.green_times_button = tk.PhotoImage(
+            file="assets/buttons/green_times_button.png"
+        )
+        self.red_minus_button = tk.PhotoImage(
+            file="assets/buttons/red_minus_button.png"
+        )
+        self.blue_7_button = tk.PhotoImage(file="assets/buttons/blue_7_button.png")
+        self.blue_8_button = tk.PhotoImage(file="assets/buttons/blue_8_button.png")
+        self.blue_9_button = tk.PhotoImage(file="assets/buttons/blue_9_button.png")
+        self.red_plus_button = tk.PhotoImage(file="assets/buttons/red_plus_button.png")
+        self.blue_4_button = tk.PhotoImage(file="assets/buttons/blue_4_button.png")
+        self.blue_5_button = tk.PhotoImage(file="assets/buttons/blue_5_button.png")
+        self.blue_6_button = tk.PhotoImage(file="assets/buttons/blue_6_button.png")
+        self.blue_1_button = tk.PhotoImage(file="assets/buttons/blue_1_button.png")
+        self.blue_2_button = tk.PhotoImage(file="assets/buttons/blue_2_button.png")
+        self.blue_3_button = tk.PhotoImage(file="assets/buttons/blue_3_button.png")
+        self.red_equals_button = tk.PhotoImage(
+            file="assets/buttons/red_equals_button.png"
+        )
+        self.blue_0_button = tk.PhotoImage(file="assets/buttons/blue_0_button.png")
+        self.blue_dot_button = tk.PhotoImage(file="assets/buttons/blue_dot_button.png")
 
         # ----------------------------Display Label-----------------------------
         self.display_label = tk.Label(self.root, image=self.display_image, bg="#e4df9c")
@@ -254,7 +260,13 @@ class Calculator:
         )
         dot_button.grid(sticky="n", row=5, column=2, pady=(15, 0), padx=(10, 10))
 
-    def update_display(self, digit):
+    def update_display(self, digit: str):
+        """
+        Changes what is displayed on the virtual screen.
+
+        Args:
+            digit: the desired number/operators.
+        """
         # Prevents the user from starting a number with ".".
         if self.display_string == "" and digit == ".":
             return
@@ -286,11 +298,17 @@ class Calculator:
             return
 
     def clear_display(self):
+        """
+        Clears whatever is on the display.
+        """
         self.display_string = ""
         self.text_label_inside_display.config(text=self.display_string)
         self.button_queue.clear()
 
     def result(self):
+        """
+        Does the operation.
+        """
         if self.display_string == "":
             return
         if self.operator == "":
