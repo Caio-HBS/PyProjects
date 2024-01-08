@@ -1,7 +1,6 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 
-# TODO: Add player tracking.
 # TODO: Add functions.
 # TODO: Add final screen to show success or failure.
 
@@ -16,10 +15,11 @@ class MainWindow:
     def __init__(self, root):
         self.root = root
         self.players = [
-            {"name": "player1", "symbol": "X"},
-            {"name": "player2", "symbol": "O"},
+            {"name": "player1", "symbol": "X", "string": "Player 1"},
+            {"name": "player2", "symbol": "O", "string": "Player 2"},
         ]
         self.current_player = self.players[0]
+        self.count = 0
         self.game_grid = BASE_GAME_GRID
         self.root.title("Tic-Tac Toe")
         style = ttk.Style(theme="solar")
@@ -111,8 +111,14 @@ class MainWindow:
                 player1_label.config(font="Arial 24 bold")
                 player2_label.config(font="Arial 24")
 
-            if self.check_game_status:
-                print("Acabou?")
+            self.count += 1
+
+            if self.count == 9:
+                # TODO: trigger draw screen.
+                return
+            else:
+                if self.check_game_status():
+                    print(f"{self.current_player['string']} won")
 
     def kill_current_screen_and_draw_new_one(self, new_window):
         """
@@ -133,33 +139,29 @@ class MainWindow:
 
         # Three consecutive "X's" or "O's" in the same a row.
         for row in self.game_grid:
-            if all(cell == row[0] for cell in row if cell is not None):
+            if row[0] == row[1] == row[2] and row[0] != None:
                 return True
 
         # Three consecutive "X's" or "O's" in the same a column.
-        for col in range(3):
-            if all(
-                row[col] == self.game_grid[0][col]
-                for row in self.game_grid
-                if row[col] is not None
-            ):
-                return True
-
-        # Three consecutive "X's" or "O's" in the main diagonal (NW to SE).
-        if all(
-            self.game_grid[i][i] == self.game_grid[0][0]
-            for i in range(3)
-            if self.game_grid[i][i] is not None
-        ):
+        if self.game_grid[0][0] == self.game_grid[1][0] == self.game_grid[2][0] and self.game_grid[0][0] != None:
+            return True
+        if self.game_grid[0][1] == self.game_grid[1][1] == self.game_grid[2][1] and self.game_grid[0][1] != None:
+            return True
+        if self.game_grid[0][2] == self.game_grid[1][2] == self.game_grid[2][2] and self.game_grid[0][2] != None:
             return True
 
-        # Three consecutive "X's" or "O's" in the secondary diagonal (SW to NE).
-        if all(
-            self.game_grid[i][2 - i] == self.game_grid[0][2]
-            for i in range(3)
-            if self.game_grid[i][2 - i] is not None
-        ):
+        # Three consecutive "X's" or "O's" in the each diagonal.
+        if self.game_grid[0][0] == "X" and self.game_grid[1][1] == "X" and self.game_grid[2][2] == "X":
             return True
+        elif self.game_grid[0][0] == "O" and self.game_grid[1][1] == "O" and self.game_grid[2][2] == "O":
+            return True
+
+        if self.game_grid[0][2] == "X" and self.game_grid[1][1] == "X" and self.game_grid[2][0] == "X":
+            return True
+        elif self.game_grid[0][2] == "O" and self.game_grid[1][1] == "O" and self.game_grid[2][0] == "O":
+            return True
+        
+        # TODO: handle draw.
 
         # No winners.
         return False
