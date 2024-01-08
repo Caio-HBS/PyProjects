@@ -5,11 +5,22 @@ import ttkbootstrap as ttk
 # TODO: Add functions.
 # TODO: Add final screen to show success or failure.
 
+BASE_GAME_GRID = [
+    [None, None, None],
+    [None, None, None],
+    [None, None, None],
+]
+
 
 class MainWindow:
     def __init__(self, root):
         self.root = root
-        self.game_grid = [[None, None, None], [None, None, None], [None, None, None]]
+        self.players = [
+            {"name": "player1", "symbol": "X"},
+            {"name": "player2", "symbol": "O"},
+        ]
+        self.current_player = self.players[0]
+        self.game_grid = BASE_GAME_GRID
         self.root.title("Tic-Tac Toe")
         style = ttk.Style(theme="solar")
         style.theme_use()
@@ -50,16 +61,16 @@ class MainWindow:
         Renders the game screen.
         """
         player1_label = ttk.Label(
-            master=self.root, text="Player 1", font="Arial 24", padding=10
+            master=self.root, text="Player 1", font="Arial 24 bold", padding=10
         )
-        player1_label.grid(row=0, column=0, padx=10, pady=10)
+        player1_label.grid(row=0, column=0)
 
         player2_label = ttk.Label(
-            master=self.root, text="Player 2", font="Arial 24 bold", padding=10
+            master=self.root, text="Player 2", font="Arial 24", padding=10
         )
-        player2_label.grid(row=0, column=1, padx=10, pady=10)
+        player2_label.grid(row=0, column=2)
 
-        # Creating a 3x3 grid of buttons
+        # Handles the 3x3 grid of buttons.
         for i in range(3):
             for j in range(3):
                 button = ttk.Button(
@@ -69,21 +80,39 @@ class MainWindow:
                 )
                 button.grid(row=i + 1, column=j, padx=10, pady=10)
 
-    def on_button_click(self, row: int, col: int, current_player: str):
+    def on_button_click(self, row: int, col: int):
         """
         Handles updating the `game_grid` as well as the styling on the player labels.
 
         Args:
             row: the row of the pressed button;
-            col: the column of the pressed button;
-            current_player: the player who clicked the button.
+            col: the column of the pressed button.
         """
-        # Prevents from clicking cells with values:
+        # Prevents from clicking cells with values.
         if self.game_grid[row][col] is None:
-            self.game_grid[row][col] = "X" # TODO: add styling change on the labels based on who's turn it is.
-            print(self.game_grid)
+            self.game_grid[row][col] = (
+                "X" if self.current_player["name"] == "player1" else "O"
+            )
 
-        
+            # Update text on the buttons.
+            button = self.root.grid_slaves(row=row + 1, column=col)[0]
+            button["text"] = self.game_grid[row][col]
+
+            # Inverts the player (and its styling) after a valid move.
+            player1_label = self.root.grid_slaves(row=0, column=0)[0]
+            player2_label = self.root.grid_slaves(row=0, column=2)[0]
+
+            if self.current_player["name"] == "player1":
+                self.current_player = self.players[1]
+                player1_label.config(font="Arial 24")
+                player2_label.config(font="Arial 24 bold")
+            else:
+                self.current_player = self.players[0]
+                player1_label.config(font="Arial 24 bold")
+                player2_label.config(font="Arial 24")
+
+            if self.check_game_status:
+                print("Acabou?")
 
     def kill_current_screen_and_draw_new_one(self, new_window):
         """
