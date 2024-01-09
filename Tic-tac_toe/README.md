@@ -22,8 +22,12 @@ If you're using Windows, you'll need to use different commands, but the script t
 
 Please use this guide to create and activate a virtual environment in Windows:
 
-***[How to create/activate a venv in Windows](https://docs.python.org/3/library/venv.html)*** (official Python documentation)
+**_[How to create/activate a venv in Windows](https://docs.python.org/3/library/venv.html)_** (official Python documentation)
 
 ## Final Thoughts
 
-TODO
+- There's definately space to improve the code, especially when it comes to the win condidition analyser, which I feel is quite amateurish on my part;
+
+- The UI also is functional, but not quite there yet, I had some trouble with the buttons;
+
+- Apart from that, there is also a quite significant bug on the code that prevents it from using the "play again" feature.
