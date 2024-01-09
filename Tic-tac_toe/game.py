@@ -1,8 +1,7 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 
-# TODO: Add functions.
-# TODO: Add final screen to show success or failure.
+# BUG: "Play again" function not working. Suspected to be something with the current_player var.
 
 BASE_GAME_GRID = [
     [None, None, None],
@@ -10,15 +9,17 @@ BASE_GAME_GRID = [
     [None, None, None],
 ]
 
+BASE_PLAYERS = [
+    {"name": "player1", "symbol": "X", "string": "Player 1"},
+    {"name": "player2", "symbol": "O", "string": "Player 2"},
+]
+
 
 class MainWindow:
     def __init__(self, root):
         self.root = root
         self.win_condition = ""
-        self.players = [
-            {"name": "player1", "symbol": "X", "string": "Player 1"},
-            {"name": "player2", "symbol": "O", "string": "Player 2"},
-        ]
+        self.players = BASE_PLAYERS
         self.current_player = self.players[0]
         self.count = 0
         self.game_grid = BASE_GAME_GRID
@@ -90,7 +91,12 @@ class MainWindow:
         Renders the final screen.
         """
         victory_label = ttk.Label(
-            master=self.root, text=f"{self.current_player['string']} won.", font="Arial 42 bold", padding=10
+            master=self.root,
+            text=f"{self.current_player['string']} won"
+            if self.win_condition != "Draw!"
+            else "No Winners!",
+            font="Arial 42 bold",
+            padding=10,
         )
         victory_label.pack()
 
@@ -99,9 +105,18 @@ class MainWindow:
         )
         win_condition_label.pack()
 
-        reset_game_button = ttk.Button(master=self.root, text="Reset game", cursor="hand2")
-        reset_game_button.pack()
-    
+        start_game_button_style = ttk.Style()
+        start_game_button_style.configure("primary.TButton", font="Arial 24 bold")
+        reset_game_button = ttk.Button(
+            master=self.root,
+            text="Play again!",
+            cursor="hand2",
+            style="primary.TButton",
+            padding=20,
+            command=lambda: self.reset_game(),
+        )
+        reset_game_button.pack(pady=140)
+
     def on_button_click(self, row: int, col: int):
         """
         Handles updating the `game_grid` as well as the styling on the player labels.
@@ -139,14 +154,18 @@ class MainWindow:
                 player1_label.config(font="Arial 24 bold")
                 player2_label.config(font="Arial 24")
 
-            
-
     def reset_game(self):
         """
-        Reset all the variables so the game can be played again.
+        Reset all the variables so the game can be played again and triggers the
+        main title screen.
         """
-        pass
-    
+        self.win_condition = ""
+        self.players = BASE_PLAYERS
+        self.current_player = self.players[0]
+        self.count = 0
+        self.game_grid = BASE_GAME_GRID
+        self.kill_current_screen_and_draw_new_one(self.main_title_screen)
+
     def kill_current_screen_and_draw_new_one(self, new_window):
         """
         Kills the current drawn screen and calls the new one.
@@ -172,35 +191,60 @@ class MainWindow:
                 return True
 
         # Three consecutive "X's" or "O's" in the same a column.
-        if self.game_grid[0][0] == self.game_grid[1][0] == self.game_grid[2][0] and self.game_grid[0][0] != None:
+        if (
+            self.game_grid[0][0] == self.game_grid[1][0] == self.game_grid[2][0]
+            and self.game_grid[0][0] != None
+        ):
             self.win_condition = "Win by column!"
             return True
-        if self.game_grid[0][1] == self.game_grid[1][1] == self.game_grid[2][1] and self.game_grid[0][1] != None:
+        if (
+            self.game_grid[0][1] == self.game_grid[1][1] == self.game_grid[2][1]
+            and self.game_grid[0][1] != None
+        ):
             self.win_condition = "Win by column!"
             return True
-        if self.game_grid[0][2] == self.game_grid[1][2] == self.game_grid[2][2] and self.game_grid[0][2] != None:
+        if (
+            self.game_grid[0][2] == self.game_grid[1][2] == self.game_grid[2][2]
+            and self.game_grid[0][2] != None
+        ):
             self.win_condition = "Win by column!"
             return True
 
         # Three consecutive "X's" or "O's" in the each diagonal.
-        if self.game_grid[0][0] == "X" and self.game_grid[1][1] == "X" and self.game_grid[2][2] == "X":
+        if (
+            self.game_grid[0][0] == "X"
+            and self.game_grid[1][1] == "X"
+            and self.game_grid[2][2] == "X"
+        ):
             self.win_condition = "Win by Win by diagonal!"
             return True
-        elif self.game_grid[0][0] == "O" and self.game_grid[1][1] == "O" and self.game_grid[2][2] == "O":
+        elif (
+            self.game_grid[0][0] == "O"
+            and self.game_grid[1][1] == "O"
+            and self.game_grid[2][2] == "O"
+        ):
             self.win_condition = "Win by Win by diagonal!"
             return True
 
-        if self.game_grid[0][2] == "X" and self.game_grid[1][1] == "X" and self.game_grid[2][0] == "X":
+        if (
+            self.game_grid[0][2] == "X"
+            and self.game_grid[1][1] == "X"
+            and self.game_grid[2][0] == "X"
+        ):
             self.win_condition = "Win by Win by diagonal!"
             return True
-        elif self.game_grid[0][2] == "O" and self.game_grid[1][1] == "O" and self.game_grid[2][0] == "O":
+        elif (
+            self.game_grid[0][2] == "O"
+            and self.game_grid[1][1] == "O"
+            and self.game_grid[2][0] == "O"
+        ):
             self.win_condition = "Win by Win by diagonal!"
             return True
-        
+
         # Draw.
         if self.count == 9:
             self.win_condition = "Draw!"
-            return True    
+            return True
 
         # No winners.
         return False
